@@ -1,0 +1,6 @@
+Manifest.toml
+.julia-depot/
+coverage/
+*.cov
+*.mem
+.DS_Store
