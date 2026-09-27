@@ -1,6 +1,6 @@
 name = "ITensorMPSDraw"
 uuid = "2f9fb53d-5811-49b8-883b-a8de1865ab6e"
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 ITensorMPS = "0d1a4710-d33b-49a5-8f18-73bdf49b47e2"

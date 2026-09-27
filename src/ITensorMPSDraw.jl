@@ -129,14 +129,17 @@ end
     savemps(path, diagram::MPSDiagram) -> String
 
 Save a `.txt` terminal drawing, returning the absolute filename. An existing file
-is overwritten. The parent directory must exist. Keywords customize `drawmps`.
+is overwritten only after rendering succeeds. The parent directory must exist.
+Keywords customize `drawmps`. Disk/IO failures during writing are not atomic.
 """
 function savemps(path::AbstractString, diagram::MPSDiagram)
     extension = lowercase(splitext(path)[2])
     extension == ".txt" || throw(ArgumentError("Use a .txt filename"))
+    # Rendering can throw, for example if a multi-index label does not fit.
+    # Finish it before opening in write mode so errors cannot truncate a file.
+    contents = sprint(show, MIME"text/plain"(), diagram; context=:displaysize => (24, 80))
     open(path, "w") do io
-        show(io, MIME"text/plain"(), diagram)
-        println(io)
+        print(io, contents, '\n')
     end
     return abspath(path)
 end

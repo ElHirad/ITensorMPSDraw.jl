@@ -157,6 +157,10 @@ for Julia's display system without printing immediately. Its snapshot remains
 unchanged if the MPS changes; call it again to refresh. Existing `MPS` display
 methods are not replaced. Only terminal/text output is provided.
 
+`savemps` finishes rendering before opening the output file, so rendering errors
+leave an existing file unchanged. It writes to the path you supply and overwrites
+that file on success; this is not a filesystem sandbox or an atomic disk write.
+
 ### Orthogonality is tracked, not recomputed
 
 The package reads ITensorMPS's tracked orthogonality range. It does not contract
@@ -203,7 +207,10 @@ QN bonds, mutation safety, long-chain wrapping, label alignment, ASCII output,
 IO, saved files, and unsupported topologies. A GitHub Actions workflow is included
 for Julia 1.10 and current stable Julia on Linux, macOS, and Windows.
 
-Locally verified: all 150 tests passed on Julia 1.11.5/macOS with both
+Version 0.1.1 passed all 157 tests on Julia 1.11.5/macOS with ITensors 0.9.30
+and ITensorMPS 0.3.45, including terminal-control and failed-save regression tests.
+
+For the original 0.1.0 release, all 150 tests passed on Julia 1.11.5/macOS with both
 ITensors 0.9.9 + ITensorMPS 0.3.19 and ITensors 0.9.30 + ITensorMPS 0.3.45.
 Installation from an extracted portable copy was also verified in an isolated
 Julia environment. The other Julia/OS combinations in CI have not been run locally.
@@ -214,5 +221,11 @@ accessor is isolated in one function because it is not exported by ITensorMPS.
 
 API references: [ITensorMPS index documentation](https://docs.itensor.org/ITensorMPS/stable/MPSandMPO.html)
 and [orthogonality tracking implementation](https://github.com/ITensor/ITensorMPS.jl/blob/main/src/abstractmps.jl).
+
+## Security review
+
+Version 0.1.1 hardens the GitHub workflow and prevents rendering errors from
+truncating saved files. See the [security review](SECURITY_REVIEW.md) for the
+scope, findings, regression tests, and dependency-review limitations.
 
 MIT licensed. Independent of, and not affiliated with, ITensor or quimb.

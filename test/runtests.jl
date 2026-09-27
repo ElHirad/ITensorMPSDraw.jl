@@ -166,4 +166,28 @@ end
         nonlocal = MPS([random_itensor(s[1], l), random_itensor(s[2]), random_itensor(s[3], l)])
         @test_throws ArgumentError drawmps(nonlocal)
     end
+
+    @testset "Terminal controls and failed saves" begin
+        # Index tags are arbitrary metadata and must never reach the terminal.
+        tagged = Index(2, "Site,\e]52;c;SGVsbG8=\a")
+        psi = MPS([ITensor(tagged)])
+        for style in (:triangles, :arrows, :ascii)
+            text = mpsstring(psi; style, site_labels=true, physical_dims=true, legend=true)
+            @test !occursin(r"[\x00-\x09\x0b-\x1f\x7f]", text)
+        end
+
+        # A legitimate multi-index bond can be too wide for a narrow terminal.
+        links = [Index(1, "link=$i") for i in 1:8]
+        sites = siteinds("S=1/2", 2)
+        wide = MPS([ITensor(sites[1], links...), ITensor(sites[2], links...)])
+        mktempdir() do dir
+            existing = joinpath(dir, "existing.txt")
+            write(existing, "original contents")
+            @test_throws ArgumentError savemps(existing, wide; width=16)
+            @test read(existing, String) == "original contents"
+            newfile = joinpath(dir, "new.txt")
+            @test_throws ArgumentError savemps(newfile, wide; width=16)
+            @test !ispath(newfile)
+        end
+    end
 end
